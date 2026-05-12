@@ -1,6 +1,7 @@
 import csv
 import random
 import numpy as np
+import pandas as pd
 
 def get_data(filename: str, class_name: str) -> np.ndarray:
     """
@@ -111,3 +112,19 @@ def split_data(
         data[num_training : num_training + num_validation],
         data[num_training + num_validation : len(data)],
     )
+
+def prepare_data(X: pd.DataFrame, y: pd.Series) -> np.ndarray:
+    """
+    Standardizes the dataframe for the DecisionTree engine.
+    1. Ensures all features are numerical.
+    2. Places the target variable (label) in the first column (index 0).
+    3. Returns a clean NumPy array.
+    """
+    target = y.values.reshape(-1, 1).astype(float)
+    
+    try:
+        features = X.values.astype(float)
+    except ValueError as e:
+        raise ValueError("Ensure all categorical columns are encoded before calling prepare_data.") from e
+    
+    return np.hstack((target, features))
