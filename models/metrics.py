@@ -3,7 +3,8 @@ import numpy as np
 def entropy(p: float) -> float:
     """Calculates Cross Entropy for a probability p."""
     if p <= 0 or p >= 1:
-        metrics = 0.0
+        return 0.0
+    
     metrics = - (p * np.log(p) + (1 - p) * np.log(1 - p))
     return metrics
 
