@@ -18,7 +18,7 @@ $Gain(S, A) = Entropy(S) - \sum_{v \in Values(A)} \frac{|S_v|}{|S|} Entropy(S_v)
 
 ### Datasets for Benchmarking
 To test the engine's performance across different domains, the following datasets are included/referenced:
-- Marketing Analytics: Predicting ad conversion based on user demographics.
+- Marketing Analytics: Predicting user purchasing intent based on demographics.
 - Biological Data (Palmer Penguins): Classifying species based on physical measurements.
 - Synthetic XOR: Visualizing non-linear decision boundaries.
 
