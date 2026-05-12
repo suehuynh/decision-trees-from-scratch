@@ -108,6 +108,42 @@ class DecisionTree:
     def accuracy(self, data: np.ndarray):
         y_pred = self.predict(data[:, 1:])
         return np.mean(y_pred == data[:, 0])
+
+    def accuracy(self, data: np.ndarray) -> float:
+        """
+        Calculates the model accuracy on the given data.
+
+        Parameters
+        ----------
+        data : np.ndarray
+           Provided dataset
+
+        Returns
+        -------
+        float
+            Accuracy value
+        """
+        return 1 - self.loss(data)
+
+    def loss(self, data: np.ndarray) -> float:
+        """
+        Calculates loss on the given data.
+
+        Parameters
+        ----------
+        data : np.ndarray
+           Provided dataset
+
+        Returns
+        -------
+        float
+            Loss value
+        """
+        labels = data[:, 0]
+        errors = 0.0
+        for i in range(data.shape[0]):
+            errors += self.predict(data[i]) != labels[i]
+        return errors / data.shape[0]
     
     # ---------------------------------------------------------
     # TRAINING PHASE
@@ -328,34 +364,85 @@ class DecisionTree:
         """
         The public entry point to train the decision tree.
         """
-        # 1. Initialize the root node at depth 0
         self.root = Node(depth=0)
         
-        # 2. Identify the feature indices (all columns except the label at index 0)
-        # data.shape[1] gives us the number of columns
         all_indices = list(range(1, train_data.shape[1]))
         
-        # 3. Kick off the recursion!
         self._split_recurs(self.root, train_data, all_indices)
         
     # ---------------------------------------------------------
     # INFERENCE
     # ---------------------------------------------------------
 
-    def predict(self, data: np.ndarray):
+    # def predict(self, data: np.ndarray):
+    #     """
+    #     Predict labels for a dataset.
+    #     data: n x m matrix (no labels, just features)
+    #     """
+    #     return np.array([self._predict_recurs(self.root, row) for row in data])
+    # def _predict_recurs(self, node: Node, row: np.ndarray) -> int:
+    #     """
+    #     Helper function to predict the label given a row of features by
+    #     traversing the tree to its leaves to obtain the label.
+
+    #     Parameters
+    #     ----------
+    #     node: Node
+    #         Current node
+    #     row : np.ndarray
+    #         Numpy array containing the row of features.
+
+    #     Returns
+    #     -------
+    #     int
+    #         Current node label or result of recursive call
+    #     """
+    #     if node.isleaf or node.index_split_on == 0:
+    #         return node.value
+    #     split_index = node.index_split_on
+    #     if not row[split_index]:
+    #         return self._predict_recurs(node.left, row)
+    #     else:
+    #         return self._predict_recurs(node.right, row)
+        
+    def predict(self, features: np.ndarray) -> int:
         """
-        Predict labels for a dataset.
-        data: n x m matrix (no labels, just features)
+        Calculate prediction label given a row of features.
+
+        Parameters
+        ----------
+        features : np.ndarray
+           Numpy array of a row of features.
+
+        Returns
+        -------
+        int
+            Predicted label value
         """
-        return np.array([self._predict_recurs(self.root, row) for row in data])
-    
-    def _predict_recurs(self, node: Node, row: np.ndarray, threshold: float):
+        return self._predict_recurs(self.root, features)
+
+    def _predict_recurs(self, node: Node, row: np.ndarray) -> int:
         """
-        Helper function to predict a single row by traversing the tree.
+        Helper function to predict the label given a row of features by
+        traversing the tree to its leaves to obtain the label. You do
+        not need to modify this.
+
+        Parameters
+        ----------
+        node: Node
+            Current node
+        row : np.ndarray
+            Numpy array containing the row of features.
+
+        Returns
+        -------
+        int
+            Current node label or result of recursive call
         """
-        if node.isleaf:
+        if node.isleaf or node.index_split_on == 0:
             return node.value
-        if row[node.index_split_on] < node.threshold:
+        split_index = node.index_split_on
+        if not row[split_index]:
             return self._predict_recurs(node.left, row)
         else:
             return self._predict_recurs(node.right, row)
@@ -372,7 +459,6 @@ class DecisionTree:
         if node is None:
             node = self.root
 
-        # Base Case: It's a leaf
         if node.isleaf:
             print(f"{indent}Leaf: Prediction = {node.value}")
             return
@@ -386,6 +472,7 @@ class DecisionTree:
         print(f"{indent}  R:", end="")
         self.print_tree(node.right, indent + "    ")
 
+    
     def _loss_plot_recurs(self, node: Node, data: np.ndarray, losses: list):
         """
         Recursively calculates loss at each node and stores it for plotting.
